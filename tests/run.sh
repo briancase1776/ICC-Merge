@@ -1,8 +1,13 @@
 #!/bin/sh
+# tests/run.sh
 # Prove the merge: get three pipes, merge side 0 of two into the third, push a
 # Frames payload bigger than one lane holds through each inlet in turn, read it
 # back whole from the outlet each time, then plain bytes on one lane from both
 # inlets, remove it. The pipes stay up.
+# Copyright (c) 2026 Brian Case. All rights reserved.
+# AI contributor: Claude (Anthropic)
+#
+# MIT License text omitted for brevity, see LICENSE
 set -eu
 cd "$(dirname "$0")/.."
 P=${ICC_PIPES:-../ICC-Pipes}/.claude/skills/icc-pipes/scripts
