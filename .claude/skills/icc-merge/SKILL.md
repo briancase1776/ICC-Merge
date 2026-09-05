@@ -20,7 +20,6 @@ and which lanes each side writes; see its SKILL.md.
     /tmp/icc-merge-XXXXXXXX/merge  DST, SIDE, then each SRC, one per line
     /tmp/icc-merge-XXXXXXXX/pid    one copier per lane SIDE writes per SRC,
                                    lane order, then SRC order within a lane
-    /tmp/icc-merge-XXXXXXXX/lock   while a writer holds the outlet; see Facts
 
 ## Operations
 
@@ -74,11 +73,6 @@ properties of that and of the lanes. The skill adds nothing to them.
   lane fails. Held lanes never do either, so the merge runs until removed
   or until a pipe on either end is removed. Then list says down. remove
   it and create it again.
-- DIR is a place the writers share. One that wants the outlet to itself
-  makes `DIR/lock` with mkdir(1) before it writes and removes it with
-  rmdir(1) after. mkdir is atomic: of two that try at once, one gets it
-  and the other fails. The merge never looks at it. Who takes it, and
-  for how long, is agreed outside. remove deletes DIR, lock and all.
 - The inlet lane is in each copier's argv; the outlet lane is not.
   `pkill -f` on a SRC path finds that inlet's copiers. On the DST path
   it finds nothing.
