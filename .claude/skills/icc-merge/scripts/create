@@ -1,0 +1,29 @@
+#!/bin/sh
+# create DST SIDE SRC...: copy what SIDE writes into every pipe SRC onto the
+# same lanes of pipe DST, byte for byte, in order per inlet, until removed.
+# Print the merge's directory. Every pipe must exist and have the same lane
+# count; the merge makes nothing but itself.
+set -eu
+[ $# -ge 3 ] || { echo "usage: create DST SIDE SRC..." >&2; exit 1; }
+dst=$1; side=$2; shift 2
+[ "$side" = 0 ] || [ "$side" = 1 ] || { echo "side is 0 or 1" >&2; exit 1; }
+for p in "$dst" "$@"; do
+  [ -p "$p/0" ] || { echo "not a pipe: $p" >&2; exit 1; }
+done
+n=$(ls "$dst" | grep -c '^[0-9][0-9]*$')
+for p; do
+  [ "$(ls "$p" | grep -c '^[0-9][0-9]*$')" -eq "$n" ] ||
+    { echo "lanes differ: $p" >&2; exit 1; }
+done
+d=$(mktemp -d /tmp/icc-merge-XXXXXXXX)
+dst=$(readlink -f "$dst")
+{ printf '%s\n' "$dst" "$side"; for p; do readlink -f "$p"; done; } > "$d/merge"
+l=$side
+while [ "$l" -lt "$n" ]; do
+  for p; do
+    cat -- "$p/$l" < /dev/null > "$dst/$l" 2>&1 &
+    echo $! >> "$d/pid"
+  done
+  l=$((l + 2))
+done
+echo "$d"

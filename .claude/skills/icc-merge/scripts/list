@@ -1,0 +1,15 @@
+#!/bin/sh
+# list: one line per merge, "DIR up|down DST SIDE SRC...".
+# Up means every copier still has its lane of DST open to write.
+for d in /tmp/icc-merge-*/; do
+  [ -d "$d" ] || continue
+  d=${d%/}
+  dst=$(sed -n 1p "$d/merge"); side=$(sed -n 2p "$d/merge")
+  m=$(( $(wc -l < "$d/merge") - 2 ))
+  s=up; i=0
+  for p in $(cat "$d/pid" 2>/dev/null); do
+    [ "$(readlink "/proc/$p/fd/1" 2>/dev/null)" = "$dst/$((side + 2 * (i / m)))" ] || s=down
+    i=$((i + 1))
+  done
+  echo "$d $s $(paste -sd ' ' < "$d/merge")"
+done
